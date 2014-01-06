@@ -1,5 +1,6 @@
 /*
 
+
  * Copyright (C) 2013 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -96,7 +97,7 @@ public class MainActivity extends Activity implements
     
     // My Library
     private static final int RAD_SEEKBAR_MIN = 00;
-    private static final int RAD_SEEKBAR_MAX = 300;
+    private static final int RAD_SEEKBAR_MAX = 10;
     // By convention
     // http://wiki.answers.com/Q/What_goes_first_Longitude_or_Latitude?#slide=2
     // latitude, north -> south
@@ -120,6 +121,7 @@ public class MainActivity extends Activity implements
     private Bitmap workingBitmap;
     private Bitmap mutableBitmap;
     private Bitmap bitmap;
+    private Bitmap customBitmap;
     private BitmapFactory.Options myOptions;
     
     /*
@@ -135,8 +137,13 @@ public class MainActivity extends Activity implements
         // Initializing
         initialize();
      	initializeDB();
-     	initializeRadSeeker();
      	initializeLocation();
+     	
+     	if ((latitude >= 0.01) || (longitude >= 0.01)) {
+     	    initializeRadSeeker();
+     	} else {
+     	    radSeek.setEnabled(false);
+     	}
     }
     
     private void initialize() {
@@ -151,7 +158,7 @@ public class MainActivity extends Activity implements
    
         myOptions = new BitmapFactory.Options();
         myOptions.inPreferredConfig = Bitmap.Config.ARGB_8888;// important       
-        bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.map35, myOptions);
+        bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.map, myOptions);
         
         paint = new Paint();
         paint.setAntiAlias(true);
@@ -197,11 +204,10 @@ public class MainActivity extends Activity implements
 	final String idTAG = "initializeRadSeeker";
 	
         radSeek.setOnSeekBarChangeListener(this);       
-        radius = 0;
-        radText.setText("" + radius);
+        radText.setText("R: " + radius);
 	radiusTriggered = false;
 	radSeek.setProgress(RAD_SEEKBAR_MIN);
-	radSeek.setMax(RAD_SEEKBAR_MAX);		
+	radSeek.setMax(RAD_SEEKBAR_MAX);
     }
     
     protected void initializeLocation() {
@@ -230,21 +236,45 @@ public class MainActivity extends Activity implements
     public void drawDots(int locationNumber) {
 	// id TAG 
 	final String idTAG = "drawDots";
+	int circleR = 6;
 		
 	// 52.4562018, 13.5260123	52.4563944, 13.5255759
 	// 52.4549391 , 13.5268336    52.4555439 , 13.527565
 	
 	paint.setAntiAlias(true);
-	paint.setColor(Color.MAGENTA);
+	paint.setColor(Color.BLUE);
+	paint.setStrokeWidth(1);
+	paint.setTextSize(16);
 
 	imageView.setAdjustViewBounds(true);
 	imageView.setImageBitmap(mutableBitmap);
 
+	// Add a custom
+	// just place the file inside the res directory and set the name after the drawable.
+	//
+	customBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.anton);
+
 	switch (locationNumber) {
-	case 1: canvas.drawCircle(84, 42, 8, paint); break;
-	case 2: canvas.drawCircle(138, 88, 8, paint); break;
-	case 8: canvas.drawCircle(173, 351, 8, paint); break;
-	case 9: canvas.drawCircle(225, 350, 8, paint); break;
+	case 1: {
+	    	     canvas.drawCircle(87, 41, circleR, paint); break;
+		}
+	case 2: canvas.drawCircle(141, 88, circleR, paint); break;
+	case 3: canvas.drawCircle(230, 92, circleR, paint); break;
+	case 4: canvas.drawCircle(395, 112, circleR, paint); break;
+	case 5: canvas.drawCircle(83, 233, circleR, paint); break;
+	case 6: canvas.drawCircle(175, 179, circleR, paint); break;
+	case 7: canvas.drawCircle(228, 254, circleR, paint); break;
+	case 8: canvas.drawCircle(176, 350, circleR, paint); break;
+	case 9: canvas.drawCircle(228, 349, circleR, paint); break;
+	case 10: canvas.drawCircle(312, 349, circleR, paint); break;
+	case 11: canvas.drawCircle(402, 350, circleR, paint); break;
+	case 12: canvas.drawCircle(77, 471, circleR, paint); break;
+	case 13: canvas.drawCircle(228, 467, circleR, paint); break;
+	case 14: canvas.drawCircle(315, 467, circleR, paint); break;
+	case 15: canvas.drawCircle(400, 467, circleR, paint); break;
+	case 16: canvas.drawCircle(74, 534, circleR, paint); break;
+	case 17: canvas.drawCircle(158, 549, circleR, paint); break;
+	case 18: canvas.drawCircle(256, 565, circleR, paint); break;	
 	}
     }
 	
@@ -265,7 +295,7 @@ public class MainActivity extends Activity implements
 		location = locClient.getLastLocation();
 		latitude = location.getLatitude();
 		longitude = location.getLongitude();
-		accuracy = location.getAccuracy();		
+		accuracy = location.getAccuracy();	
         }
     }
  
@@ -317,7 +347,6 @@ public class MainActivity extends Activity implements
         if (ConnectionResult.SUCCESS == resultCode) {
             // In debug mode, log the status
 //            Log.d(LocationUtils.APPTAG, getString(R.string.play_services_available));
-
             // Continue
             return true;
         // Google Play services was not available for some reason
@@ -347,7 +376,9 @@ public class MainActivity extends Activity implements
     	accuracy = location.getAccuracy();
     		
         // Display the current location in the UI
-        mLatLng.setText("" + latitude + " " + longitude);
+        mLatLng.setText("" + latitude + "    " + longitude);
+        radSeek.setEnabled(true);
+        initializeRadSeeker();
    }
     
     /*
@@ -430,9 +461,8 @@ public class MainActivity extends Activity implements
 	// id TAG 
 	final String idTAG = "onProgressChanged";
 	radius = progress;
-	radText.setText("" + radius);
 
-	paint.setColor(Color.TRANSPARENT);
+	radText.setText("R: " + radius);
 	mutableBitmap = workingBitmap.copy(Bitmap.Config.ARGB_8888, true);
 	canvas = new Canvas (mutableBitmap);
 	imageView.setAdjustViewBounds(true);
@@ -440,8 +470,8 @@ public class MainActivity extends Activity implements
 	
 	for (MyPosition myposition : listOfPosition) {	        	
 	    listlatlng = new LatLng(Double.parseDouble(myposition.getLatitude()), Double.parseDouble(myposition.getLongitude()));
-	    Location.distanceBetween(52.4583809, 13.5267019, listlatlng.latitude, listlatlng.longitude, distance);	
-	    
+//	    Location.distanceBetween(52.4583809, 13.5267019, listlatlng.latitude, listlatlng.longitude, distance);	
+	    Location.distanceBetween(latitude, longitude, listlatlng.latitude, listlatlng.longitude, distance);
 	    if (distance[0] < progress) {
 		drawDots(Integer.parseInt(myposition.getLocationnumber()));
 	    } else { }	
