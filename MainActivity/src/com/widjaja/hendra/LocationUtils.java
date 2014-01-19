@@ -29,11 +29,11 @@ import android.location.Location;
 /**
  * Defines app-wide constants and utilities
  */
+@SuppressWarnings("unused")
 public final class LocationUtils {
-
-    // Debugging tag for the application
-    public static final String APPTAG = "Geo Location";
-
+    // Main TAG 
+    private static final String APPTAG = "LocationUtils";
+    
     /*
      * Define a request code to send to Google Play services
      * This code is returned in Activity.onActivityResult
@@ -63,9 +63,6 @@ public final class LocationUtils {
     // Create an empty string for initializing strings
     public static final String EMPTY_STRING = new String();
 
-    public double latitude;
-    public double longitude;
-    
     /**
      * Get the latitude and longitude from the Location object returned by
      * Location Services.

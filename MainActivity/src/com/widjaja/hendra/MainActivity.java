@@ -1,6 +1,4 @@
 /*
-
-
  * Copyright (C) 2013 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,7 +16,9 @@
 
 package com.widjaja.hendra;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.TreeMap;
 
 import android.app.Activity;
 import android.app.Dialog;
@@ -55,6 +55,8 @@ import com.google.android.gms.location.LocationClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.plus.model.people.Person.Collection;
+import com.google.android.maps.MyLocationOverlay;
  
 /**
  * This the app's main Activity. It provides buttons for requesting the various features of the
@@ -96,23 +98,9 @@ public class MainActivity extends Activity implements
     private static ImageView imageView;
     
     // My Library
-    private static final int RAD_SEEKBAR_MIN = 00;
-    private static final int RAD_SEEKBAR_MAX = 10;
-    // By convention
-    // http://wiki.answers.com/Q/What_goes_first_Longitude_or_Latitude?#slide=2
-    // latitude, north -> south
-    // longitude, east -> west
-    private double latitude, longitude, accuracy;
-    private int radius;
-    private boolean radiusTriggered;
-    private float[] distance = new float[2];
-    
     private Location location;
     private SeekBar radSeek;
     private TextView radText;
-    private MySQLiteHelper MyDB;
-    private SQLiteDatabase SQLDB;
-    private List<MyPosition> listOfPosition;
     private LatLng listlatlng;
     private Paint paint;
     private Canvas canvas;
@@ -121,8 +109,19 @@ public class MainActivity extends Activity implements
     private Bitmap workingBitmap;
     private Bitmap mutableBitmap;
     private Bitmap bitmap;
-    private Bitmap customBitmap;
     private BitmapFactory.Options myOptions;
+    
+    private MySQLiteHelper MyDB;
+    private SQLiteDatabase SQLDB;
+    private MyPosition myposition;
+    private List<MyPosition> listOfPosition;
+    private int circleRadius;
+    private int radius;
+    private boolean radiusTriggered;
+    private float[] distance = new float[2];
+    private static final int RAD_SEEKBAR_MIN = 00;
+    private static final int RAD_SEEKBAR_MAX = 20;
+    private double latitude, longitude;       
     
     /*
      * Initialize the Activity
@@ -138,17 +137,11 @@ public class MainActivity extends Activity implements
         initialize();
      	initializeDB();
      	initializeLocation();
-     	
-     	if ((latitude >= 0.01) || (longitude >= 0.01)) {
-     	    initializeRadSeeker();
-     	} else {
-     	    radSeek.setEnabled(false);
-     	}
     }
     
     private void initialize() {
 	// id TAG 
-	final String idTAG = "initialize";
+	final String idTAG = "Initialize";
 		
 	// Get handles to the UI view objects
         mLatLng = (TextView) findViewById(R.id.lat_lng);
@@ -161,10 +154,14 @@ public class MainActivity extends Activity implements
         bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.map, myOptions);
         
         paint = new Paint();
-        paint.setAntiAlias(true);
-        paint.setDither(true);
         workingBitmap = Bitmap.createBitmap(bitmap);
-        mutableBitmap = workingBitmap.copy(Bitmap.Config.ARGB_8888, true);    	
+        mutableBitmap = workingBitmap.copy(Bitmap.Config.ARGB_8888, true); 
+       
+        if ((latitude >= 0.01) || (longitude >= 0.01)) {
+     	    initializeRadSeeker();
+     	} else {
+     	    radSeek.setEnabled(false);
+     	}
     }
     
     /*
@@ -193,7 +190,7 @@ public class MainActivity extends Activity implements
             }
         }        
         MyDB = new MySQLiteHelper(this);
-        listOfPosition = MyDB.getAllPositions();
+        listOfPosition = MyDB.getAllPositions();  
    }
 	
     /*
@@ -212,16 +209,16 @@ public class MainActivity extends Activity implements
     
     protected void initializeLocation() {
 	// id TAG 
-	final String idTAG = "initializeLocationPreSetting";
+	final String idTAG = "initializeLocation";
 	
 	/*
          * Set the update interval
          */
         locReq = LocationRequest.create();
         locReq.setInterval(LocationUtils.UPDATE_INTERVAL_IN_MILLISECONDS);
-        locReq.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);  					// Use high accuracy
+        locReq.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);  			// Use high accuracy
         locReq.setFastestInterval(LocationUtils.FAST_INTERVAL_CEILING_IN_MILLISECONDS); // Set the interval ceiling to one minute
-        locReq.setExpirationDuration(300);
+        locReq.setExpirationDuration(350);
         
         /*
          * Create a new location client, using the enclosing class to
@@ -236,48 +233,116 @@ public class MainActivity extends Activity implements
     public void drawDots(int locationNumber) {
 	// id TAG 
 	final String idTAG = "drawDots";
-	int circleR = 6;
-		
-	// 52.4562018, 13.5260123	52.4563944, 13.5255759
-	// 52.4549391 , 13.5268336    52.4555439 , 13.527565
-	
-	paint.setAntiAlias(true);
-	paint.setColor(Color.BLUE);
-	paint.setStrokeWidth(1);
-	paint.setTextSize(16);
 
+	paint.setAntiAlias(true);
+	paint.setColor(Color.BLUE);	
 	imageView.setAdjustViewBounds(true);
 	imageView.setImageBitmap(mutableBitmap);
-
-	// Add a custom
-	// just place the file inside the res directory and set the name after the drawable.
-	//
-	customBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.anton);
-
+	circleRadius = 6;
 	switch (locationNumber) {
-	case 1: {
-	    	     canvas.drawCircle(87, 41, circleR, paint); break;
-		}
-	case 2: canvas.drawCircle(141, 88, circleR, paint); break;
-	case 3: canvas.drawCircle(230, 92, circleR, paint); break;
-	case 4: canvas.drawCircle(395, 112, circleR, paint); break;
-	case 5: canvas.drawCircle(83, 233, circleR, paint); break;
-	case 6: canvas.drawCircle(175, 179, circleR, paint); break;
-	case 7: canvas.drawCircle(228, 254, circleR, paint); break;
-	case 8: canvas.drawCircle(176, 350, circleR, paint); break;
-	case 9: canvas.drawCircle(228, 349, circleR, paint); break;
-	case 10: canvas.drawCircle(312, 349, circleR, paint); break;
-	case 11: canvas.drawCircle(402, 350, circleR, paint); break;
-	case 12: canvas.drawCircle(77, 471, circleR, paint); break;
-	case 13: canvas.drawCircle(228, 467, circleR, paint); break;
-	case 14: canvas.drawCircle(315, 467, circleR, paint); break;
-	case 15: canvas.drawCircle(400, 467, circleR, paint); break;
-	case 16: canvas.drawCircle(74, 534, circleR, paint); break;
-	case 17: canvas.drawCircle(158, 549, circleR, paint); break;
-	case 18: canvas.drawCircle(256, 565, circleR, paint); break;	
+ 	case 1: canvas.drawCircle(87, 41, circleRadius, paint); break;
+ 	case 2: canvas.drawCircle(141, 88, circleRadius, paint); break;	
+ 	case 3: canvas.drawCircle(230, 92, circleRadius, paint); break;
+ 	case 4: canvas.drawCircle(395, 112, circleRadius, paint); break;
+ 	case 5: canvas.drawCircle(83, 233, circleRadius, paint); break;
+ 	case 6: canvas.drawCircle(175, 179, circleRadius, paint); break;
+ 	case 7: canvas.drawCircle(228, 254, circleRadius, paint); break;
+ 	case 8: canvas.drawCircle(176, 350, circleRadius, paint); break;
+ 	case 9: canvas.drawCircle(228, 349, circleRadius, paint); break;
+ 	case 10: canvas.drawCircle(312, 349, circleRadius, paint); break;
+ 	case 11: canvas.drawCircle(402, 350, circleRadius, paint); break;
+ 	case 12: canvas.drawCircle(77, 471, circleRadius, paint); break;
+ 	case 13: canvas.drawCircle(228, 467, circleRadius, paint); break;
+ 	case 14: canvas.drawCircle(315, 467, circleRadius, paint); break;
+ 	case 15: canvas.drawCircle(400, 467, circleRadius, paint); break;
+ 	case 16: canvas.drawCircle(74, 534, circleRadius, paint); break;
+ 	case 17: canvas.drawCircle(158, 549, circleRadius, paint); break;
+ 	case 18: canvas.drawCircle(256, 565, circleRadius, paint); break;
+ 	default: break;
+ 	}
+    }
+    
+    /*
+     * drawingMe Initialization
+     */
+    public void whereAmI() {
+	// id TAG 
+	final String idTAG = "whereAmI";
+
+	paint.setAntiAlias(true);
+	paint.setColor(Color.GREEN);	
+	imageView.setAdjustViewBounds(true);
+	imageView.setImageBitmap(mutableBitmap);
+	circleRadius = 8;
+	int locationNumber = 0;
+	initializeRadSeeker();
+
+        HashMap <Double, Double> lm = new HashMap <Double, Double>();
+        TreeMap <Double, Double> sort = new TreeMap <Double, Double>();
+         
+        for (MyPosition myposition : listOfPosition) {	        	
+	    listlatlng = new LatLng(Double.parseDouble(myposition.getLatitude()), Double.parseDouble(myposition.getLongitude()));
+//	    Location.distanceBetween(52.4583809, 13.5267019, listlatlng.latitude, listlatlng.longitude, distance);
+	    Location.distanceBetween(latitude, longitude, listlatlng.latitude, listlatlng.longitude, distance);
+	    if (distance[0] < 20) {    
+	    	lm.put(Double.parseDouble(myposition.getLocationnumber()), (double) distance[0]);
+	    } else { }
+	}
+
+        try {
+            sort.putAll(lm);    
+            locationNumber = sort.firstKey().intValue();
+        } catch(Exception e) {
+            Log.d(APPTAG, "You are far away from HTW Campus!");
+        }
+        
+	switch (locationNumber) {
+	     case 1: canvas.drawCircle(87, 41, circleRadius, paint); break;
+	     	// Point 1 to point 2
+	     	case 19: canvas.drawCircle(93.75f, 46.875f, circleRadius, paint);  break;
+	     	case 20: canvas.drawCircle(100.5f, 52.75f, circleRadius, paint); break;
+	     	case 21: canvas.drawCircle(114.0f, 64.5f, circleRadius, paint); break; 
+	     	case 22: canvas.drawCircle(127.5f, 76.25f, circleRadius, paint);  break;
+	     	case 23: canvas.drawCircle(134.25f, 82.125f, circleRadius, paint);  break;
+	     
+	     case 2: canvas.drawCircle(141, 88, circleRadius, paint); break;	
+	     	// Point 2 to point 3
+	     	
+	     case 3: canvas.drawCircle(230, 92, circleRadius, paint); break;
+	     
+	     case 4: canvas.drawCircle(395, 112, circleRadius, paint); break;
+	     
+	     case 5: canvas.drawCircle(83, 233, circleRadius, paint); break;
+	     
+	     case 6: canvas.drawCircle(175, 179, circleRadius, paint); break;
+	     
+	     case 7: canvas.drawCircle(228, 254, circleRadius, paint); break;
+	     
+	     case 8: canvas.drawCircle(176, 350, circleRadius, paint); break;
+	     
+	     case 9: canvas.drawCircle(228, 349, circleRadius, paint); break;
+	     
+	     case 10: canvas.drawCircle(312, 349, circleRadius, paint); break;
+	     
+	     case 11: canvas.drawCircle(402, 350, circleRadius, paint); break;
+	     
+	     case 12: canvas.drawCircle(77, 471, circleRadius, paint); break;
+	     
+	     case 13: canvas.drawCircle(228, 467, circleRadius, paint); break;
+	     
+	     case 14: canvas.drawCircle(315, 467, circleRadius, paint); break;
+	     
+	     case 15: canvas.drawCircle(400, 467, circleRadius, paint); break;
+	     
+	     case 16: canvas.drawCircle(74, 534, circleRadius, paint); break;
+	     
+	     case 17: canvas.drawCircle(158, 549, circleRadius, paint); break;
+	     
+	     case 18: canvas.drawCircle(256, 565, circleRadius, paint); break;	     
+	     default: break;
 	}
     }
-	
+    
     /*
      * Called when the Activity is restarted, even before it becomes visible.
      */
@@ -294,8 +359,7 @@ public class MainActivity extends Activity implements
         if (locClient != null && locClient.isConnected()) {
 		location = locClient.getLastLocation();
 		latitude = location.getLatitude();
-		longitude = location.getLongitude();
-		accuracy = location.getAccuracy();	
+		longitude = location.getLongitude();	
         }
     }
  
@@ -329,12 +393,12 @@ public class MainActivity extends Activity implements
             // If any other request code was received
             default:
                // Report that this Activity received an unknown requestCode
-//               Log.d(LocationUtils.APPTAG, getString(R.string.unknown_activity_request_code, requestCode));
+//             Log.d(LocationUtils.APPTAG, getString(R.string.unknown_activity_request_code, requestCode));
                break;
         }
     }
 
-    /**
+    /*
      * Verify that Google Play services is available before making a request.
      *
      * @return true if Google Play services is available, otherwise false
@@ -358,7 +422,7 @@ public class MainActivity extends Activity implements
         }
     }
 
-    /**
+    /*
      * Invoked by the "Get Location" button.
      *
      * Calls getLastLocation() to get the current location
@@ -373,13 +437,13 @@ public class MainActivity extends Activity implements
     	location = locClient.getLastLocation();
         latitude = location.getLatitude();
     	longitude = location.getLongitude();
-    	accuracy = location.getAccuracy();
     		
         // Display the current location in the UI
-        mLatLng.setText("" + latitude + "    " + longitude);
+        mLatLng.setText("" + latitude + "   " + longitude);
+        whereAmI();
         radSeek.setEnabled(true);
         initializeRadSeeker();
-   }
+    }
     
     /*
      * Called by Location Services when the request to connect the
@@ -393,7 +457,6 @@ public class MainActivity extends Activity implements
     	location = locClient.getLastLocation();
 	latitude = location.getLatitude();
 	longitude = location.getLongitude();
-	accuracy = location.getAccuracy();
     }
 
     /*
@@ -423,11 +486,8 @@ public class MainActivity extends Activity implements
          */
         if (connectionResult.hasResolution()) {
             try {
-
-                // Start an Activity that tries to resolve the error
-                connectionResult.startResolutionForResult(
-                        this, LocationUtils.CONNECTION_FAILURE_RESOLUTION_REQUEST);
-
+        	// Start an Activity that tries to resolve the error
+        	connectionResult.startResolutionForResult(this, LocationUtils.CONNECTION_FAILURE_RESOLUTION_REQUEST);
                 /*
                 * Thrown if Google Play services canceled the original
                 * PendingIntent
@@ -453,7 +513,6 @@ public class MainActivity extends Activity implements
         location = locClient.getLastLocation();
 	latitude = location.getLatitude();
 	longitude = location.getLongitude();
-	accuracy = location.getAccuracy();
     }
     
     @Override 

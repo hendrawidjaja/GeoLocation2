@@ -22,15 +22,19 @@ package com.widjaja.hendra;
  *  All rights are reserved. Copyright(c) 2013 Hendra Widjaja
  */
 import com.google.android.gms.common.ConnectionResult;
+
 import android.content.Context;
 import android.content.res.Resources;
+import android.util.Log;
 
 import com.example.android.location.R;
 
 /**
  * Map error codes to error messages.
  */
-public class LocationServiceErrorMessages {
+public final class LocationServiceErrorMessages {
+    // Main TAG 
+    private static final String APPTAG = "LocationServiceErrorMessages";
 
     // Don't allow instantiation
     private LocationServiceErrorMessages() {}
@@ -95,6 +99,7 @@ public class LocationServiceErrorMessages {
         }
 
         // Return the error message
+        Log.d(APPTAG, errorString);
         return errorString;
     }
 }

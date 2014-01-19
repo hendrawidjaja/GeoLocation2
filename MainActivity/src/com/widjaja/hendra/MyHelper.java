@@ -1,6 +1,23 @@
 package com.widjaja.hendra;
 
+import android.util.Log;
+
+/* 
+ *  This is a class from MainActivity - Augmented Reality
+ *  This class has been modified and adjusted to my project
+ *  All rights are reserved. Copyright(c) 2013 Hendra Widjaja
+ */
 public class MyHelper {
+    // Main TAG 
+    private static final String APPTAG = "MyHelper";
+    private String copyright = APPTAG + "; Copyright(c) 2013, Hendra Widjaja.  eMail: hendrawidjaja@live.de";
+	
+    public MyHelper() {
+	Log.d(APPTAG, "" + showCopyright());
+    }
+    public String showCopyright() {
+	return copyright;
+    }
     
     /**
      * Calculates the distance in km and m between two lat/long points

@@ -26,11 +26,12 @@ import android.util.Log;
  */
 @SuppressWarnings("unused")
 public class MySQLiteHelper extends SQLiteOpenHelper {
+    // Main TAG 
+    private static final String APPTAG = "MySQLiteHelper";
+    private String copyright = APPTAG + "; Copyright(c) 2013, Hendra Widjaja.  eMail: hendrawidjaja@live.de";
 	
-	// Database Version
+    // Database Version
     private static final int DB_VERSION = 1;
-    // id TAG 
- 	private final String mainTAG = "MySQLiteHelper";		
     
     /*
      * The Android's default system path of the application database in internal
@@ -64,7 +65,8 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
     protected MySQLiteHelper(Context context) {
 	super(context, DB_NAME, null, DB_VERSION);
 	this.MySQLContext = context;
-	DB_PATH = MySQLContext.getDatabasePath(DB_NAME).getAbsolutePath();	    
+	DB_PATH = MySQLContext.getDatabasePath(DB_NAME).getAbsolutePath();	
+	Log.d(APPTAG, showCopyright());
     }
 
     @Override
@@ -190,7 +192,7 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
         int i = db.update(TABLE_LOCATIONS, //table
         		  values, // column/value
         		  KEY_ID+" = ?", // selections
-                new String[] { String.valueOf(position.getId()) }); //selection args
+        new String[] { String.valueOf(position.getId()) }); //selection args
         
         // 4. close
         db.close();       
@@ -324,7 +326,6 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
     public static void copyFile(String fromFile, String toFile) throws IOException {
         // id TAG 
      	final String idTAG = "copyFile";
-
     	copyFile(new FileInputStream(fromFile), new FileOutputStream(toFile));
     }
 
@@ -344,7 +345,6 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
     public static void copyFile(File fromFile, File toFile) throws IOException {
         // id TAG 
      	final String idTAG = "copyFile";
-
     	copyFile(new FileInputStream(fromFile), new FileOutputStream(toFile));
     }
 
@@ -397,7 +397,6 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
     private static String[] parseSqlFile(String sqlFile) throws IOException {
         // id TAG 
      	final String idTAG = "getAllPosition";
-
     	return parseSqlFile(new BufferedReader(new FileReader(sqlFile)));
     }
 
@@ -486,12 +485,13 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
         sqlFile.close();
         return sql.toString().split(";");
     }
- 
+    public String showCopyright() {
+	return copyright;
+    }
     @Override
     public void onOpen(SQLiteDatabase db) {
         super.onOpen(db);
     }
- 
     public String getDBDir() {
 	return DB_DIR;
     }
