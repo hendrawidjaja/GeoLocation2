@@ -1,11 +1,11 @@
 package com.widjaja.hendra;
 
-
 /* 
  *  This is a class from MainActivity - Augmented Reality
  *  This class has been modified and adjusted to my project
  *  All rights are reserved. Copyright(c) 2013 Hendra Widjaja
  */
+
 public class MyPosition {
     // Main TAG 
     private static final String APPTAG = "MyPosition";

@@ -24,6 +24,7 @@ import android.util.Log;
  *  This class has been modified and adjusted to my project
  *  All rights are reserved. Copyright(c) 2013 Hendra Widjaja
  */
+
 @SuppressWarnings("unused")
 public class MySQLiteHelper extends SQLiteOpenHelper {
     // Main TAG 
@@ -66,7 +67,6 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
 	super(context, DB_NAME, null, DB_VERSION);
 	this.MySQLContext = context;
 	DB_PATH = MySQLContext.getDatabasePath(DB_NAME).getAbsolutePath();	
-	Log.d(APPTAG, showCopyright());
     }
 
     @Override
@@ -159,17 +159,23 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
     MyPosition position = null;
     if (cursorGetAllPosition.moveToFirst()) {
 	do {
+	    // Create a new Object
 	    position = new MyPosition(null, null, null);
-            position.setId(Integer.parseInt(cursorGetAllPosition.getString(0)));
-            position.setLatitude(cursorGetAllPosition.getString(1));
-            position.setLongitude(cursorGetAllPosition.getString(2));
-            position.setLocationnumber(cursorGetAllPosition.getString(3));
+            // Put the Id into the object
+	    position.setId(Integer.parseInt(cursorGetAllPosition.getString(0)));
+            // Put the latitude value into the object
+	    position.setLatitude(cursorGetAllPosition.getString(1));
+	    // Put the longitude value into the object
+	    position.setLongitude(cursorGetAllPosition.getString(2));
+            // Put the locationnumber value into the object
+	    position.setLocationnumber(cursorGetAllPosition.getString(3));
             
             // Add 
             positions.add(position);
             } while (cursorGetAllPosition.moveToNext());
         }    
         cursorGetAllPosition.close();
+        // Close the database
         db.close();
         return positions;
     }

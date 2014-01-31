@@ -21,24 +21,30 @@ package com.widjaja.hendra;
  *  All rights are reserved. Copyright(c) 2013 Hendra Widjaja
  */
 
-import com.example.android.location.R;
-
 import android.content.Context;
 import android.location.Location;
 
 /**
  * Defines app-wide constants and utilities
  */
-@SuppressWarnings("unused")
+
 public final class LocationUtils {
     // Main TAG 
-    private static final String APPTAG = "LocationUtils";
+    static final String APPTAG = "LocationUtils";
+    
+    // Name of shared preferences repository that stores persistent state
+    public static final String SHARED_PREFERENCES =
+            "com.widjaja.hendra.location.SHARED_PREFERENCES";
+    
+    // Key for storing the "updates requested" flag in shared preferences
+    public static final String KEY_UPDATES_REQUESTED =
+            "com.widjaja.hendra.location.KEY_UPDATES_REQUESTED";
     
     /*
      * Define a request code to send to Google Play services
      * This code is returned in Activity.onActivityResult
      */
-    public final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
+    public final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 5000;
 
     /*
      * Constants for location update parameters
@@ -47,7 +53,7 @@ public final class LocationUtils {
     public static final int MILLISECONDS_PER_SECOND = 1000;
 
     // The update interval
-    public static final int UPDATE_INTERVAL_IN_SECONDS = 5;
+    public static final int UPDATE_INTERVAL_IN_SECONDS = 8;
 
     // A fast interval ceiling
     public static final int FAST_CEILING_IN_SECONDS = 1;

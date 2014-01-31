@@ -16,22 +16,15 @@
 
 package com.widjaja.hendra;
 
-/* 
- *  This is a class from MainActivity
- *  This class has been modified and adjusted to my project
- *  All rights are reserved. Copyright(c) 2013 Hendra Widjaja
- */
 import com.google.android.gms.common.ConnectionResult;
-
 import android.content.Context;
 import android.content.res.Resources;
 import android.util.Log;
 
-import com.example.android.location.R;
-
 /**
  * Map error codes to error messages.
  */
+
 public final class LocationServiceErrorMessages {
     // Main TAG 
     private static final String APPTAG = "LocationServiceErrorMessages";
